@@ -8,16 +8,18 @@
   great caution.</p>
   {% if high_risk %}
   <table class="listing">
-    <tr><th>Website</th><th>Result</th><th>Score</th><th>Registered</th><th>Country</th></tr>
+    <thead><tr><th>Website</th><th>Result</th><th>Score</th><th>Registered</th><th>Country</th></tr></thead>
+    <tbody>
     {% for s in high_risk %}
     <tr>
-      <td><a href="{{ url_for('site', domain=s.domain) }}">{{ s.domain }}</a></td>
-      <td><span class="pill level-{{ s.level|lower }}">{{ s.level }}</span></td>
-      <td>{{ s.score }}</td>
-      <td class="muted">{{ (s.registered or '')[:10] or '—' }}</td>
-      <td class="muted">{{ s.host_country or '—' }}</td>
+      <td data-label="Website"><a href="{{ url_for('site', domain=s.domain) }}">{{ s.domain }}</a></td>
+      <td data-label="Result"><span class="pill level-{{ s.level|lower }}">{{ s.level }}</span></td>
+      <td data-label="Score">{{ s.score }}</td>
+      <td data-label="Registered" class="muted">{{ (s.registered or '')[:10] or '—' }}</td>
+      <td data-label="Country" class="muted">{{ s.host_country or '—' }}</td>
     </tr>
     {% endfor %}
+    </tbody>
   </table>
   {% else %}
   <p class="muted">No sites checked yet.</p>
@@ -28,14 +30,16 @@
   <h2>Most recently checked</h2>
   {% if recent %}
   <table class="listing">
-    <tr><th>Website</th><th>Result</th><th>When</th></tr>
+    <thead><tr><th>Website</th><th>Result</th><th>When</th></tr></thead>
+    <tbody>
     {% for s in recent %}
     <tr>
-      <td><a href="{{ url_for('site', domain=s.domain) }}">{{ s.domain }}</a></td>
-      <td><span class="pill level-{{ s.level|lower }}">{{ s.level }}</span></td>
-      <td class="muted">{{ (s.scanned_at or '')[:16].replace('T',' ') }}</td>
+      <td data-label="Website"><a href="{{ url_for('site', domain=s.domain) }}">{{ s.domain }}</a></td>
+      <td data-label="Result"><span class="pill level-{{ s.level|lower }}">{{ s.level }}</span></td>
+      <td data-label="When" class="muted">{{ (s.scanned_at or '')[:16].replace('T',' ') }}</td>
     </tr>
     {% endfor %}
+    </tbody>
   </table>
   {% else %}
   <p class="muted">No sites checked yet.</p>

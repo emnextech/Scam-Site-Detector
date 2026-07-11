@@ -152,8 +152,73 @@ ul.siblings li { font-family: "Courier New", monospace; font-size: 13px; }
 }
 .footer p { margin: 6px 0; }
 
-@media (max-width: 520px) {
-  .header { flex-direction: column; align-items: flex-start; gap: 6px; }
-  .nav a { margin-left: 0; margin-right: 14px; }
-  .facts th { width: 45%; }
+/* Let long content (tables/URLs) scroll inside its box instead of the page. */
+.table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* ------------------------------------------------------------------ *
+   Mobile / small screens
+ * ------------------------------------------------------------------ */
+@media (max-width: 560px) {
+  body { font-size: 15px; }
+  .page { padding: 0 10px 32px; }
+
+  /* Header stacks; nav wraps under the brand */
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 0 -10px 16px;
+    padding: 12px 14px;
+  }
+  .brand { font-size: 18px; }
+  .nav { display: flex; flex-wrap: wrap; }
+  .nav a { margin-left: 0; margin-right: 16px; padding: 4px 0; font-size: 14px; }
+
+  .card { padding: 14px 14px; }
+  h1 { font-size: 20px; }
+  h2 { font-size: 16px; }
+  .verdict-level { font-size: 21px; }
+
+  /* Full-width, thumb-friendly form controls.
+     16px font stops iOS Safari from zooming in on focus. */
+  .scanform { gap: 10px; }
+  .scanform input[type=text],
+  .scanform input[type=submit] {
+    flex: 1 1 100%;
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 16px;
+  }
+
+  /* Listing tables collapse: each row becomes a stacked, labelled card. */
+  .listing thead { position: absolute; left: -9999px; }   /* visually hide header */
+  .listing, .listing tbody, .listing tr, .listing td { display: block; width: 100%; }
+  .listing tr {
+    border: 1px solid #d7d7cf;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    background: #fcfcf9;
+  }
+  .listing td {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 14px;
+    padding: 9px 12px;
+    text-align: right;
+    border-bottom: 1px solid #ececec;
+  }
+  .listing tr td:last-child { border-bottom: none; }
+  .listing td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    color: #555;
+    text-align: left;
+    flex: 0 0 auto;
+  }
+  .listing td a { word-break: break-all; }
+
+  /* Key/value facts: give the value more room */
+  .facts th, .facts td { padding: 8px 8px; }
+  .facts th { width: 44%; }
 }

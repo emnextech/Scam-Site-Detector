@@ -24,14 +24,16 @@
 <div class="card">
   <h2>Recently checked sites</h2>
   <table class="listing">
-    <tr><th>Website</th><th>Result</th><th>Registered</th></tr>
+    <thead><tr><th>Website</th><th>Result</th><th>Registered</th></tr></thead>
+    <tbody>
     {% for s in recent %}
     <tr>
-      <td><a href="{{ url_for('site', domain=s.domain) }}">{{ s.domain }}</a></td>
-      <td><span class="pill level-{{ s.level|lower }}">{{ s.level }}</span></td>
-      <td class="muted">{{ (s.registered or '')[:10] or '&mdash;'|safe }}</td>
+      <td data-label="Website"><a href="{{ url_for('site', domain=s.domain) }}">{{ s.domain }}</a></td>
+      <td data-label="Result"><span class="pill level-{{ s.level|lower }}">{{ s.level }}</span></td>
+      <td data-label="Registered" class="muted">{{ (s.registered or '')[:10] or '&mdash;'|safe }}</td>
     </tr>
     {% endfor %}
+    </tbody>
   </table>
   <p class="hint"><a href="{{ url_for('catalog') }}">See all recently checked sites &raquo;</a></p>
 </div>
