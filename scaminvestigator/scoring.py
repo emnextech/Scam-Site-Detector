@@ -176,6 +176,9 @@ def assess(recon: Dict) -> Dict:
         score += 4
         reasons.append(f"Registered through {rdap.get('registrar')}, a registrar often abused for scams.")
 
+    # --- page content signals (SPA scam-app fingerprints) -------------------
+    score += _score_content(recon, reasons)
+
     # --- positives ----------------------------------------------------------
     if dns.get("MX"):
         positives.append("Domain has real mail (MX) records configured.")
@@ -208,6 +211,60 @@ def assess(recon: Dict) -> Dict:
         "summary": summary,
         "facts": facts,
     }
+
+
+# URL-level referral funnel: ?invite_code=, /register?ref=, /invite/..., etc.
+REFERRAL_RE = re.compile(r"(invite|referr?al|promo|agent|recommend)[_-]?(code|id)?=|/(invite|register|signup)\b", re.I)
+
+# Cap how much the page content alone can add, so infrastructure (esp. domain age)
+# still drives whether something reaches High/Critical.
+CONTENT_CAP = 38
+
+
+def _score_content(recon: Dict, reasons: List[str]) -> int:
+    """Score scam-app fingerprints found in the landing page + its JS/CSS bundles."""
+    page = recon.get("page", {}) or {}
+    url = recon.get("target_url") or ""
+    kc = page.get("keyword_counts", {}) or {}
+    added = 0
+
+    # Recruitment / referral funnel — the strongest tell of these apps.
+    invite_words = kc.get("invite", 0) + kc.get("invitation", 0) + kc.get("referral", 0)
+    if REFERRAL_RE.search(url) or invite_words:
+        added += 10
+        reasons.append("Sign-up runs through a referral/invite code — a recruitment funnel "
+                       "typical of 'invite friends to earn' investment scams.")
+
+    # Deposit-and-withdraw money app: mentions BOTH 'recharge' and 'withdraw'.
+    if kc.get("recharge", 0) and (kc.get("withdraw", 0) or kc.get("withdrawal", 0)):
+        added += 16
+        reasons.append("The site is a deposit-and-withdraw money app (it repeatedly references "
+                       "'recharge' and 'withdraw') — the core mechanic of task/investment scams.")
+
+    # VIP tiers / levels — pay more to 'upgrade' for higher returns.
+    if kc.get("vip", 0) or kc.get("level", 0) >= 5:
+        added += 6
+        reasons.append("Uses paid 'VIP' tiers / levels that promise higher earnings — a common scam structure.")
+
+    # Chinese-language codebase behind an English-facing site.
+    if page.get("cjk_count", 0) >= 20:
+        added += 8
+        reasons.append("Built from a Chinese-language codebase although presented to "
+                       "English-speaking users — common for these off-the-shelf scam kits.")
+
+    # Contact only via Telegram (no real company channel).
+    if page.get("telegram"):
+        added += 5
+        reasons.append("Primary contact is Telegram — scammers prefer it because it is anonymous "
+                       "and hard to trace.")
+
+    # Crypto cash-out wallet on the page.
+    if page.get("wallet_tron_usdt") or page.get("wallet_btc") or page.get("wallet_eth"):
+        added += 8
+        reasons.append("Asks for payment to a cryptocurrency wallet — money sent there is "
+                       "almost impossible to recover.")
+
+    return min(added, CONTENT_CAP)
 
 
 def _summary(level: str, score: int, facts: Dict, reasons: List[str]) -> str:

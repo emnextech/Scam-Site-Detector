@@ -20,6 +20,7 @@ from typing import Dict, List
 from . import recon as R
 from . import deepdive as D
 from . import scoring
+from . import content as C
 
 # crt.sh and reverse-IP can be huge/slow for big legit domains; cap them tightly so a
 # web scan stays snappy. On timeout the scan just proceeds without that signal.
@@ -82,6 +83,7 @@ def quick_scan(url: str, do_deep: bool = True) -> Dict:
         f_tls = ex.submit(_safe, lambda: R.tls_cert(host), {})
         f_wb = ex.submit(_safe, lambda: R.wayback_history(host), [])
         f_ipinfo = ex.submit(_safe, lambda: [R.ip_info(ip) for ip in first_ips], [])
+        f_page = ex.submit(_safe, lambda: C.fetch_signals(url, host), {})
         f_ct = ex.submit(_safe, lambda: D.crtsh(host, timeout=CRTSH_TIMEOUT), {}) if do_deep else None
         f_rev = (ex.submit(_safe, lambda: [D.reverse_ip(ip, timeout=REVERSE_IP_TIMEOUT)
                                            for ip in first_ips], [])
@@ -93,6 +95,7 @@ def quick_scan(url: str, do_deep: bool = True) -> Dict:
         tls = _result_by(f_tls, {}, deadline)
         wayback = _result_by(f_wb, [], deadline)
         ip_details = _result_by(f_ipinfo, [], deadline)
+        page = _result_by(f_page, {}, deadline)
         ct = _result_by(f_ct, {}, deadline) if do_deep else {}
         reverse = _result_by(f_rev, [], deadline) if do_deep else []
     finally:
@@ -107,6 +110,7 @@ def quick_scan(url: str, do_deep: bool = True) -> Dict:
         "dns": dns,
         "tls_certificate": tls,
         "ip_details": ip_details,
+        "page": page,
         "wayback_saved_now": None,
         "wayback_history": wayback,
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),

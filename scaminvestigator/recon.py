@@ -34,17 +34,41 @@ def host_of(url_or_host: str) -> str:
 
 # --- WHOIS via RDAP ----------------------------------------------------------
 
+def registrable_candidates(host: str) -> List[str]:
+    """
+    RDAP is only defined for the *registered* domain, not sub-hosts, so a lookup of
+    'www.galaxy260.com' 404s while 'galaxy260.com' succeeds. We can't ship a full
+    Public Suffix List here, so try the host and progressively strip the left-most
+    label, stopping at two labels. The first candidate that resolves wins, which also
+    copes with multi-part TLDs (e.g. www.foo.co.uk -> foo.co.uk).
+    """
+    labels = (host or "").strip(".").lower().split(".")
+    cands = [".".join(labels[i:]) for i in range(max(1, len(labels) - 1))]
+    cands = [c for c in cands if c.count(".") >= 1]  # need at least name.tld
+    return cands or [host]
+
+
 def rdap_domain(domain: str) -> Dict:
-    """Registry data via RDAP (the modern, structured replacement for WHOIS)."""
+    """Registry data via RDAP (the modern, structured replacement for WHOIS).
+
+    Tries the registrable-domain candidates so sub-hosts like www.* still resolve."""
     out: Dict = {"domain": domain, "source": "rdap.org"}
-    try:
-        r = requests.get(f"https://rdap.org/domain/{domain}", headers=UA, timeout=TIMEOUT)
-        if r.status_code != 200:
-            out["error"] = f"RDAP HTTP {r.status_code}"
-            return out
-        data = r.json()
-    except (requests.RequestException, ValueError) as exc:
-        out["error"] = f"RDAP failed: {exc}"
+    data = None
+    last_err = None
+    for cand in registrable_candidates(domain):
+        try:
+            r = requests.get(f"https://rdap.org/domain/{cand}", headers=UA, timeout=TIMEOUT)
+            if r.status_code != 200:
+                last_err = f"RDAP HTTP {r.status_code}"
+                continue
+            data = r.json()
+            out["queried"] = cand
+            break
+        except (requests.RequestException, ValueError) as exc:
+            last_err = f"RDAP failed: {exc}"
+            continue
+    if data is None:
+        out["error"] = last_err or "RDAP: no registrable domain resolved"
         return out
 
     events = {e.get("eventAction"): e.get("eventDate") for e in data.get("events", [])}
