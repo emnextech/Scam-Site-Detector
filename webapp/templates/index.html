@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+  <h1>Is this website a scam?</h1>
+  <p class="lead">Paste the address of an "investment", "mining", or "earn money"
+  website below. We will check when it was created, when it expires, who hosts it,
+  and whether it looks like a scam.</p>
+
+  {% if error %}
+  <div class="alert">{{ error }}</div>
+  {% endif %}
+
+  <form action="{{ url_for('scan') }}" method="post" class="scanform"
+        onsubmit="var b=document.getElementById('go'); b.value='Checking...'; b.disabled=true;">
+    <input type="text" name="url" placeholder="example.com  or  https://example.com"
+           value="{{ prefill or '' }}" autofocus autocomplete="off">
+    <input type="submit" id="go" value="Check this site">
+  </form>
+  <p class="hint">A check takes about 15&ndash;30 seconds. Please be patient.</p>
+</div>
+
+{% if recent %}
+<div class="card">
+  <h2>Recently checked sites</h2>
+  <table class="listing">
+    <tr><th>Website</th><th>Result</th><th>Registered</th></tr>
+    {% for s in recent %}
+    <tr>
+      <td><a href="{{ url_for('site', domain=s.domain) }}">{{ s.domain }}</a></td>
+      <td><span class="pill level-{{ s.level|lower }}">{{ s.level }}</span></td>
+      <td class="muted">{{ (s.registered or '')[:10] or '&mdash;'|safe }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <p class="hint"><a href="{{ url_for('catalog') }}">See all recently checked sites &raquo;</a></p>
+</div>
+{% endif %}
+
+{% endblock %}

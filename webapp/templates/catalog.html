@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Recently Checked &mdash; Scam Site Detector{% endblock %}
+{% block content %}
+
+<div class="card">
+  <h1>Highest-risk sites</h1>
+  <p class="lead">Websites checked here that scored the highest risk. Treat these with
+  great caution.</p>
+  {% if high_risk %}
+  <table class="listing">
+    <tr><th>Website</th><th>Result</th><th>Score</th><th>Registered</th><th>Country</th></tr>
+    {% for s in high_risk %}
+    <tr>
+      <td><a href="{{ url_for('site', domain=s.domain) }}">{{ s.domain }}</a></td>
+      <td><span class="pill level-{{ s.level|lower }}">{{ s.level }}</span></td>
+      <td>{{ s.score }}</td>
+      <td class="muted">{{ (s.registered or '')[:10] or '—' }}</td>
+      <td class="muted">{{ s.host_country or '—' }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="muted">No sites checked yet.</p>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>Most recently checked</h2>
+  {% if recent %}
+  <table class="listing">
+    <tr><th>Website</th><th>Result</th><th>When</th></tr>
+    {% for s in recent %}
+    <tr>
+      <td><a href="{{ url_for('site', domain=s.domain) }}">{{ s.domain }}</a></td>
+      <td><span class="pill level-{{ s.level|lower }}">{{ s.level }}</span></td>
+      <td class="muted">{{ (s.scanned_at or '')[:16].replace('T',' ') }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="muted">No sites checked yet.</p>
+  {% endif %}
+</div>
+
+{% endblock %}

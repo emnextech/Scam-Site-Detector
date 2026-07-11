@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% set a = r.assessment %}
+{% set f = a.facts %}
+{% set rec = r.recon %}
+{% block title %}{{ r.domain }} &mdash; Scam Site Detector{% endblock %}
+{% block content %}
+
+<div class="card">
+  <p class="crumb"><a href="{{ url_for('index') }}">&laquo; Check another site</a></p>
+  <h1 class="result-domain">{{ r.domain }}</h1>
+
+  <div class="verdict level-{{ a.level|lower }}">
+    <div class="verdict-level">{{ a.level }} Risk</div>
+    <div class="verdict-score">Risk score: {{ a.score }} / 100</div>
+  </div>
+
+  <p class="summary">{{ a.summary }}</p>
+  {% if cached %}<p class="hint">Showing a recently saved result for this site.</p>{% endif %}
+</div>
+
+<div class="card">
+  <h2>The key facts</h2>
+  <table class="facts">
+    <tr><th>Website</th><td>{{ r.domain }}</td></tr>
+    <tr><th>Registered on</th><td>{{ (f.registered or '')[:19] or 'Unknown' }}
+        {% if f.age_days is not none %}<span class="muted">({{ f.age_days }} days ago)</span>{% endif %}</td></tr>
+    <tr><th>Expires on</th><td>{{ (f.expires or '')[:19] or 'Unknown' }}
+        {% if f.days_until_expiry is not none %}<span class="muted">(in {{ f.days_until_expiry }} days)</span>{% endif %}</td></tr>
+    <tr><th>Registrar</th><td>{{ f.registrar or 'Unknown' }}</td></tr>
+    <tr><th>Hosting company</th><td>{{ f.host_org or 'Unknown' }}</td></tr>
+    <tr><th>Hosting country</th><td>{{ f.host_country or 'Unknown' }}</td></tr>
+  </table>
+</div>
+
+{% if a.reasons %}
+<div class="card">
+  <h2>Warning signs found ({{ a.reasons|length }})</h2>
+  <ul class="flags">
+    {% for reason in a.reasons %}<li>{{ reason }}</li>{% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+{% if a.positives %}
+<div class="card">
+  <h2>Reassuring signs</h2>
+  <ul class="positives">
+    {% for p in a.positives %}<li>{{ p }}</li>{% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+{% if f.scam_siblings %}
+<div class="card">
+  <h2>Other suspicious sites on the same server</h2>
+  <p>These websites are hosted on the same server and have scam-like names. They may be
+  run by the same people. Be careful with all of them.</p>
+  <ul class="siblings">
+    {% for s in f.scam_siblings %}<li>{{ s }}</li>{% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<div class="card advice">
+  <h2>What should you do?</h2>
+  {% if a.level in ['High', 'Critical'] %}
+  <ul>
+    <li><strong>Do not deposit or send any money.</strong></li>
+    <li>If you already paid, do <strong>not</strong> pay more "fees" to withdraw &mdash; that is a second trick.</li>
+    <li>Save your payment messages and screenshots as evidence.</li>
+    <li>Report it to your mobile-money provider's fraud line and the police cyber-crime unit.</li>
+  </ul>
+  {% elif a.level == 'Medium' %}
+  <ul>
+    <li>Be cautious. Do not send money until you can independently verify the company.</li>
+    <li>Check whether the company is licensed by your country's securities regulator.</li>
+  </ul>
+  {% else %}
+  <ul>
+    <li>No strong scam signs were found, but always be careful with money online.</li>
+    <li>"Guaranteed daily profit" and "invite friends to earn" are still classic scam promises &mdash; verify before paying.</li>
+  </ul>
+  {% endif %}
+  {% if f.abuse_email %}
+  <p class="muted">To request takedown, the domain's abuse contact is: {{ f.abuse_email }}</p>
+  {% endif %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}About &mdash; Scam Site Detector{% endblock %}
+{% block content %}
+
+<div class="card">
+  <h1>About this tool</h1>
+  <p>Fake "investment", "cloud mining", and "complete tasks and earn" websites steal
+  money from ordinary people &mdash; often the poorest, who can least afford to lose it.
+  This free tool helps you check a website <em>before</em> you trust it with your money.</p>
+
+  <h2>What it checks</h2>
+  <ul class="flags">
+    <li><strong>When the domain was created.</strong> Most scam sites are only days or
+    weeks old. Real companies usually have older websites.</li>
+    <li><strong>When the domain expires.</strong> Scammers often register for the
+    shortest possible time (one year) because they plan to disappear.</li>
+    <li><strong>Who hosts it and where.</strong> Cheap, offshore, throwaway hosting is
+    a common scam sign.</li>
+    <li><strong>Other sites on the same server.</strong> Scammers run many fake sites
+    from one place; if the neighbours look like scams too, that is a strong warning.</li>
+    <li><strong>Domain history tricks.</strong> Some scammers buy old expired domains to
+    look established.</li>
+  </ul>
+
+  <h2>How to read the result</h2>
+  <p>Each site gets a risk score from 0 to 100 and a level: Low, Medium, High, or
+  Critical. A high score means the site behaves like known scams &mdash; it is a strong
+  warning to be careful, not a court verdict.</p>
+
+  <h2>Important</h2>
+  <p>This tool uses only public information and makes an automatic estimate. It can be
+  wrong in both directions. A "Low" result is not a guarantee a site is safe, and a
+  "High" result is not legal proof of a crime. <strong>Please do not use these results
+  to publicly accuse a named individual.</strong> If you have lost money, report it to
+  your mobile-money provider and the police cyber-crime unit, and keep all your records.</p>
+</div>
+
+{% endblock %}

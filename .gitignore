@@ -1,0 +1,24 @@
+# Never commit collected evidence or secrets
+evidence/
+evidence_*/
+*.cookie
+cookie.txt
+__pycache__/
+*.pyc
+.venv/
+
+# Web app local database (scan catalogue)
+webapp/scans.db
+*.db
+
+# Editor / tooling local config
+.claude/
+.vscode/
+.idea/
+
+# Python
+.venv/
+venv/
+build/
+dist/
+*.egg-info/
