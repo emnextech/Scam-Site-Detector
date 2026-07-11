@@ -8,6 +8,8 @@ Paste a web address and get a plain-English verdict focused on the facts that ma
 **when the domain was registered, when it expires, how old it is, who hosts it, other
 suspicious sites on the same server, and an overall risk score.**
 
+![Scam Site Detector home page](docs/screenshots/home.png)
+
 It ships in two parts:
 
 | Part | For whom | What it is |
